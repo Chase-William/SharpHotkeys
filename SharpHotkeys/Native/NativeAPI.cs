@@ -37,9 +37,12 @@ namespace SharpHotkeys.Native
     /// </summary>
     internal static class NativeAPI
     {
+        /// <summary>
+        /// User32 DLL that contains these external functions.
+        /// </summary>
         const string USER_32 = "user32";
 
-        // https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-registerhotkey
+        // Read Source: https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-registerhotkey
         [DllImport(USER_32, SetLastError = true)]
         public static extern bool RegisterHotKey(   
             HWND hWnd, 
@@ -48,14 +51,14 @@ namespace SharpHotkeys.Native
             uint vk
         );
 
-        // https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-unregisterhotkey
+        // Read Source: https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-unregisterhotkey
         [DllImport(USER_32, SetLastError = true)]
         public static extern bool UnregisterHotKey(
             HWND hWnd,
             int id
         );
 
-        // https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-callnexthookex
+        // Read Source: https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-callnexthookex
         [DllImport(USER_32)]
         public static extern IntPtr CallNextHookEx(
           HHOOK hhk,
@@ -64,13 +67,19 @@ namespace SharpHotkeys.Native
           LPARAM lParam
         );
 
-        // https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setwindowshookexa
+        // Read Source: https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setwindowshookexa
         [DllImport(USER_32)]
         public static extern HHOOK SetWindowsHookExA(
             int idHook,
             HOOKPROC lpfn, // Pass method address callback function here for intercepting hooks
             HINSTANCE hmod,
             DWORD dwThreadId
+        );
+
+        // Read Source: https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-unhookwindowshookex
+        [DllImport(USER_32)]
+        public static extern bool UnhookWindowsHookEx(
+          HHOOK hhk
         );
 
         // https://docs.microsoft.com/en-us/windows/win32/api/errhandlingapi/nf-errhandlingapi-getlasterror
