@@ -17,6 +17,7 @@ using SharpHotkeys.Native;
 using static SharpHotkeys.Native.Delegates;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Windows.Interop;
 
 namespace SharpHotkeys.Hotkeys
 {
@@ -198,7 +199,7 @@ namespace SharpHotkeys.Hotkeys
                 errCode = User32.GetLastError();
                 return false;
             }
-
+            HwndSource
             IsRegistered = false;
             hotkeys.Remove(_nCode);
             return true;

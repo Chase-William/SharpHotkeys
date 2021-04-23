@@ -27,7 +27,11 @@ namespace Sample
 
             IntPtr windowHandle = new WindowInteropHelper(this).Handle;
 
-            hotkey = new Hotkey(SharpHotkeys.Enumerations.Keys.F6, SharpHotkeys.Enumerations.Modifiers.MOD_CONTROL, windowHandle);
+            hotkey = new Hotkey(SharpHotkeys.Enumerations.Keys.B, 
+                SharpHotkeys.Enumerations.Modifiers.MOD_CONTROL | SharpHotkeys.Enumerations.Modifiers.MOD_NOREPEAT, 
+                windowHandle
+                );
+
             if (!hotkey.TryRegisterHotkey(out uint errCode))
             {
                 lbl.Content = errCode;
