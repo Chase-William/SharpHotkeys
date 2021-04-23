@@ -47,7 +47,7 @@ namespace SharpHotkeys.Enumerations
         F9 = 0x78,
         F10 = 0x79,
         F11 = 0x7A,
-        F112 = 0x7B,
+        F112 = 0x7B,      
 
         // Other Keys
         ESC = 0x1B

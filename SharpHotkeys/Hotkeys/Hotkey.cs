@@ -16,6 +16,7 @@ using SharpHotkeys.Enumerations;
 using SharpHotkeys.Native;
 using static SharpHotkeys.Native.Delegates;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
 namespace SharpHotkeys.Hotkeys
 {
@@ -32,16 +33,26 @@ namespace SharpHotkeys.Hotkeys
         /// <summary>
         /// Unique identifier for this hot-key used by the operating system.
         /// </summary>
-        readonly int nCode;
+        readonly int _nCode;
 
         /// <summary>
         /// Handle to a window being used.
         /// </summary>
         readonly HWND hwnd = HWND.Zero;
 
-        #region Shared Fields
+        bool isDisposed = false;
 
+        #region Shared Fields
+        /// <summary>
+        /// 
+        /// </summary>
         static Process process;
+
+        /// <summary>
+        /// Our callback method for responding to hooks. It is important this delegate instance is not disposed until
+        /// the end of the application because it is needed by the system once registered.
+        /// </summary>
+        static HookCallbackDelegate hookCallbackDelegate = HookCallback;
 
         /// <summary>
         /// A handle to our shared hook callback function.
@@ -74,8 +85,8 @@ namespace SharpHotkeys.Hotkeys
         /// <param name="windowHandle"></param>
         public Hotkey(Keys key, Modifiers modifiers, HWND windowHandle)
         {
-            nCode = Init(key, modifiers);
             hwnd = windowHandle;
+            _nCode = Init(key, modifiers);            
         }
 
         /// <summary>
@@ -86,7 +97,7 @@ namespace SharpHotkeys.Hotkeys
         /// <param name="modifiers"></param>
         public Hotkey(Keys key, Modifiers modifiers)
         {
-            nCode = Init(key, modifiers);
+            _nCode = Init(key, modifiers);
         }
 
         /// <summary>
@@ -99,7 +110,46 @@ namespace SharpHotkeys.Hotkeys
         {
             Key = key;
             Mods = modifiers;
-            return (int)key + (int)modifiers;
+            return GetHashCode();
+        }        
+
+        /// <summary>
+        /// Unregisters the hot-key if registered before disposing. 
+        /// Further, Unhooks the callback function used to listen for hot-keys being clicked from the system if registered.
+        /// </summary>
+        public void Dispose()
+        {            
+            Dispose(true);
+            // Prevent Finalizer from being called twice.
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool isDisposing)
+        {
+            if (!this.isDisposed) // Hasn't been disposed already
+            {
+                if (IsRegistered)
+                    TryUnregisterHotkey(out uint errCode);
+
+
+                // Disposing has been done
+                isDisposed = true;
+            }            
+        }
+
+        ~Hotkey()
+        {
+            Dispose(false);
+        }
+
+        /// <summary>
+        /// Clean up unmanaged shared resources used by all hot-keys. It is important this is called
+        /// before your program exits to prevent a resource leak.
+        /// </summary>
+        public static void ReleaseStaticResources()
+        {
+            User32.UnhookWindowsHookEx(hhook);
+            process.Dispose();
         }
 
         /// <summary>
@@ -109,33 +159,31 @@ namespace SharpHotkeys.Hotkeys
         public virtual bool TryRegisterHotkey(out uint errCode)
         {
             errCode = 0;
-            
+
             if (IsRegistered) return true; // Already Registered
 
             if (hhook == HHOOK.Zero) // Register our callback function with the system
             {
                 process = Process.GetCurrentProcess();
                 IntPtr hInstance = User32.GetModuleHandle(process.MainModule.ModuleName);
-                hhook = User32.SetWindowsHookExA(13, HookCallback, hInstance, 0);
+                hhook = User32.SetWindowsHookExA((int)HookProcedures.WH_KEYBOARD_LL, hookCallbackDelegate, hInstance, 0);
                 if (hhook == HHOOK.Zero)
                 {
                     errCode = User32.GetLastError();
                     return false;
                 }
-                // Subscribe to exit process so we can release static resources                
-                process.Exited += Process_Exited;
             }
 
-            if (!User32.RegisterHotKey(hwnd, nCode, (uint)Mods, (uint)Key))
+            if (!User32.RegisterHotKey(hwnd, _nCode, (uint)Mods, (uint)Key))
             {
                 errCode = User32.GetLastError();
                 return false;
             }
 
             IsRegistered = true;
-            hotkeys.Add(nCode, this);
+            hotkeys.Add(_nCode, this);
             return true;
-        }        
+        }
 
         /// <summary>
         /// Unregisters the <see cref="Hotkey"/>.
@@ -145,25 +193,15 @@ namespace SharpHotkeys.Hotkeys
         {
             errCode = 0;
             if (!IsRegistered) return true; // Already Unregistered
-            if (!User32.UnregisterHotKey(hwnd, nCode))
+            if (!User32.UnregisterHotKey(hwnd, _nCode))
             {
                 errCode = User32.GetLastError();
                 return false;
             }
 
             IsRegistered = false;
-            hotkeys.Remove(nCode);
+            hotkeys.Remove(_nCode);
             return true;
-        }
-
-        /// <summary>
-        /// Unregisters the hot-key if registered before disposing. 
-        /// Further, Unhooks the callback function used to listen for hot-keys being clicked from the system if registered.
-        /// </summary>
-        public virtual void Dispose()
-        {
-            if (IsRegistered)
-                TryUnregisterHotkey(out uint errCode);
         }
 
         /// <summary>
@@ -171,6 +209,9 @@ namespace SharpHotkeys.Hotkeys
         /// </summary>
         protected virtual void OnHotkeyClicked()
             => HotkeyClicked?.Invoke();
+
+        public override int GetHashCode()
+            => (int)Key + (int)Mods + hwnd.ToInt32();
 
         /// <summary>
         /// Callback function that is registered with the system using <see cref="User32.SetWindowsHookExA(int, HookCallbackDelegate, HWND, uint)"/>.
@@ -180,23 +221,18 @@ namespace SharpHotkeys.Hotkeys
         /// <param name="lParam"></param>
         /// <returns></returns>
         static LRESULT HookCallback(int nCode, WPARAM wParam, LPARAM lParam)
-        {            
+        {
+            if (nCode < 0) // Do not process message
+                return User32.CallNextHookEx(hhook, nCode, wParam, lParam);
+
+            var keyMsg = Marshal.PtrToStructure<KBDLLHOOKSTRUCT>(lParam);
+
+            Console.WriteLine($"Key: {(Keys)keyMsg.vkCode}");
+
             if (hotkeys.ContainsKey(nCode)) // Raise Hot-key clicked event
                 hotkeys[nCode].OnHotkeyClicked();
 
             return User32.CallNextHookEx(hhook, nCode, wParam, lParam);
-        }
-
-        /// <summary>
-        /// Executes when the process is exiting. Will only execute if the process successfully bound a hook callback
-        /// with the system.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        void Process_Exited(object sender, EventArgs e)
-        {
-            User32.UnhookWindowsHookEx(hhook);
-            process.Exited -= Process_Exited;
-        }
+        }        
     }
 }
