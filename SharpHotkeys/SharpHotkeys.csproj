@@ -44,7 +44,7 @@
     <Compile Include="Enumerations\Keys.cs" />
     <Compile Include="Enumerations\Modifiers.cs" />
     <Compile Include="Hotkeys\Hotkey.cs" />
-    <Compile Include="Native\NativeAPI.cs" />
+    <Compile Include="Native\User32.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup />

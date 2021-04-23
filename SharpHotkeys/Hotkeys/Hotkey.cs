@@ -4,10 +4,18 @@
 */
 
 using System;
+using System.Diagnostics;
 using HWND = System.IntPtr;
+using HHOOK = System.IntPtr;
+using LRESULT = System.IntPtr;
+using WPARAM = System.UIntPtr;
+using LPARAM = System.IntPtr;
+using HOOKPROC = System.IntPtr;
 
 using SharpHotkeys.Enumerations;
 using SharpHotkeys.Native;
+using static SharpHotkeys.Native.Delegates;
+using System.Collections.Generic;
 
 namespace SharpHotkeys.Hotkeys
 {
@@ -17,17 +25,31 @@ namespace SharpHotkeys.Hotkeys
     /// </summary>
     public class Hotkey : IDisposable
     {
+        const int WH_CALLWNDPROC = 0x04;
+
         public event Action HotkeyClicked;
+
+        readonly static Dictionary<int, Hotkey> hotkeys = new Dictionary<int, Hotkey>();
 
         /// <summary>
         /// Unique identifier for this hot-key used by the operating system.
         /// </summary>
-        private readonly int keyId;
+        readonly int nCode;
 
         /// <summary>
         /// Handle to a window being used.
         /// </summary>
-        private readonly HWND hwnd = HWND.Zero;
+        readonly HWND hwnd = HWND.Zero;
+
+        #region Shared Fields
+
+        static Process process;
+
+        /// <summary>
+        /// A handle to our shared hook callback function.
+        /// </summary>
+        static HHOOK hhook;
+        #endregion
 
         #region Properties
         /// <summary>
@@ -38,13 +60,13 @@ namespace SharpHotkeys.Hotkeys
         /// <summary>
         /// 
         /// </summary>
-        public Modifiers Mods { get; private set; }
-        #endregion
+        public Modifiers Mods { get; private set; }        
 
         /// <summary>
         /// Gets a boolean indicating if this hot-key is currently registered.
         /// </summary>
         public bool IsRegistered { get; private set; }
+        #endregion
 
         /// <summary>
         /// Initializes a new <see cref="Hotkey"/> instance and associates it with the given <paramref name="windowHandle"/>
@@ -54,7 +76,7 @@ namespace SharpHotkeys.Hotkeys
         /// <param name="windowHandle"></param>
         public Hotkey(Keys key, Modifiers modifiers, HWND windowHandle)
         {
-            keyId = Init(key, modifiers);
+            nCode = Init(key, modifiers);
             hwnd = windowHandle;
         }
 
@@ -66,7 +88,7 @@ namespace SharpHotkeys.Hotkeys
         /// <param name="modifiers"></param>
         public Hotkey(Keys key, Modifiers modifiers)
         {
-            keyId = Init(key, modifiers);
+            nCode = Init(key, modifiers);
         }
 
         /// <summary>
@@ -79,7 +101,7 @@ namespace SharpHotkeys.Hotkeys
         {
             // Multiple flags set
             if ((key & (key - 1)) != 0)
-                throw new NotSupportedException("The parameter <key> had multiple flags set which would result in the same hot-key needing to respond to key strokes from separate keys. This is currently unsupported.");
+                throw new NotSupportedException("The parameter <key> had multiple flags set which would result in the same hot-key needing to respond to key strokes from separate keys. This is currently unsupported.");                      
 
             Key = key;
             Mods = modifiers;
@@ -90,41 +112,95 @@ namespace SharpHotkeys.Hotkeys
         /// Registers the <see cref="Hotkey"/>.
         /// </summary>
         /// <returns>Indication of success.</returns>
-        public virtual bool TryRegisterHotkey()
+        public virtual bool TryRegisterHotkey(out uint errCode)
         {
-            if (!NativeAPI.RegisterHotKey(hwnd, keyId, (uint)Mods, (uint)Key))
-                return false;   // Failure
+            errCode = 0;
+            if (IsRegistered) return true; // Already Registered
+
+            if (hhook == null) // Register our callback function with the system
+            {
+                hhook = User32.SetWindowsHookExA(WH_CALLWNDPROC, HookCallback, IntPtr.Zero, 0);
+                if (hhook == null)
+                {
+                    errCode = User32.GetLastError();
+                    return false;
+                }
+                // Subscribe to exit process so we can release static resources
+                process = Process.GetCurrentProcess();
+                process.Exited += Process_Exited;
+            }
+
+            if (!User32.RegisterHotKey(hwnd, nCode, (uint)Mods, (uint)Key))
+            {
+                errCode = User32.GetLastError();
+                return false;
+            }
 
             IsRegistered = true;
+            hotkeys.Add(nCode, this);
             return true;
-        }
+        }        
 
         /// <summary>
         /// Unregisters the <see cref="Hotkey"/>.
         /// </summary>
         /// <returns>Indication of success.</returns>
-        public virtual bool TryUnregisterHotkey()
+        public virtual bool TryUnregisterHotkey(out uint errCode)
         {
-            if (!NativeAPI.UnregisterHotKey(hwnd, keyId))
-                return false;   // Failure
+            errCode = 0;
+            if (!IsRegistered) return true; // Already Unregistered
+            if (!User32.UnregisterHotKey(hwnd, nCode))
+            {
+                errCode = User32.GetLastError();
+                return false;
+            }
 
             IsRegistered = false;
+            hotkeys.Remove(nCode);
             return true;
         }
 
         /// <summary>
-        /// Unregisters the hot-key if registered before disposing.
+        /// Unregisters the hot-key if registered before disposing. 
+        /// Further, Unhooks the callback function used to listen for hot-keys being clicked from the system if registered.
         /// </summary>
         public virtual void Dispose()
         {
             if (IsRegistered)
-                TryUnregisterHotkey();
+                TryUnregisterHotkey(out uint errCode);
         }
 
         /// <summary>
-        /// 
+        /// Raises the <see cref="HotkeyClicked"/> event.
         /// </summary>
         protected virtual void OnHotkeyClicked()
             => HotkeyClicked?.Invoke();
+
+        /// <summary>
+        /// Callback function that is registered with the system using <see cref="User32.SetWindowsHookExA(int, HookCallbackDelegate, HWND, uint)"/>.
+        /// </summary>
+        /// <param name="nCode"></param>
+        /// <param name="wParam"></param>
+        /// <param name="lParam"></param>
+        /// <returns></returns>
+        static LRESULT HookCallback(in int nCode, in WPARAM wParam, in LPARAM lParam)
+        {            
+            if (hotkeys.ContainsKey(nCode)) // Raise Hot-key clicked event
+                hotkeys[nCode].OnHotkeyClicked();
+
+            return User32.CallNextHookEx(hhook, nCode, wParam, lParam);
+        }
+
+        /// <summary>
+        /// Executes when the process is exiting. Will only execute if the process successfully bound a hook callback
+        /// with the system.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        void Process_Exited(object sender, EventArgs e)
+        {
+            User32.UnhookWindowsHookEx(hhook);
+            process.Exited -= Process_Exited;
+        }
     }
 }
