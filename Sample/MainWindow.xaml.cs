@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,6 +9,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
@@ -35,7 +37,9 @@ namespace Sample
         {
             base.OnSourceInitialized(e);
 
-            hotkey = new Hotkey(SharpHotkeys.Enumerations.Keys.F6, SharpHotkeys.Enumerations.Modifiers.MOD_NONE);
+            IntPtr windowHandle = new WindowInteropHelper(this).Handle;
+
+            hotkey = new Hotkey(SharpHotkeys.Enumerations.Keys.F6, SharpHotkeys.Enumerations.Modifiers.MOD_NONE, windowHandle);
             if (!hotkey.TryRegisterHotkey(out uint errCode))
             {
                 lbl.Content = errCode;
@@ -47,6 +51,13 @@ namespace Sample
                     lbl.Content = counter++;
                 };
             }
+        }
+
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            hotkey.TryUnregisterHotkey(out uint errCode);
+
+            base.OnClosing(e);
         }
     }
 }

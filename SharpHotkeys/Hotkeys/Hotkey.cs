@@ -24,9 +24,7 @@ namespace SharpHotkeys.Hotkeys
     /// Read Source: https://docs.microsoft.com/en-us/windows/win32/winmsg/hooks
     /// </summary>
     public class Hotkey : IDisposable
-    {
-        const int WH_CALLWNDPROC = 0x04;
-
+    {        
         public event Action HotkeyClicked;
 
         readonly static Dictionary<int, Hotkey> hotkeys = new Dictionary<int, Hotkey>();
@@ -48,7 +46,7 @@ namespace SharpHotkeys.Hotkeys
         /// <summary>
         /// A handle to our shared hook callback function.
         /// </summary>
-        static HHOOK hhook;
+        static HHOOK hhook = IntPtr.Zero;
         #endregion
 
         #region Properties
@@ -99,13 +97,9 @@ namespace SharpHotkeys.Hotkeys
         /// <returns>HashCode of this <see cref="Hotkey"/> instance.</returns>
         int Init(Keys key, Modifiers modifiers)
         {
-            // Multiple flags set
-            if ((key & (key - 1)) != 0)
-                throw new NotSupportedException("The parameter <key> had multiple flags set which would result in the same hot-key needing to respond to key strokes from separate keys. This is currently unsupported.");                      
-
             Key = key;
             Mods = modifiers;
-            return GetHashCode();
+            return (int)key + (int)modifiers;
         }
 
         /// <summary>
@@ -115,18 +109,20 @@ namespace SharpHotkeys.Hotkeys
         public virtual bool TryRegisterHotkey(out uint errCode)
         {
             errCode = 0;
+            
             if (IsRegistered) return true; // Already Registered
 
-            if (hhook == null) // Register our callback function with the system
+            if (hhook == HHOOK.Zero) // Register our callback function with the system
             {
-                hhook = User32.SetWindowsHookExA(WH_CALLWNDPROC, HookCallback, IntPtr.Zero, 0);
-                if (hhook == null)
+                process = Process.GetCurrentProcess();
+                IntPtr hInstance = User32.GetModuleHandle(process.MainModule.ModuleName);
+                hhook = User32.SetWindowsHookExA(13, HookCallback, hInstance, 0);
+                if (hhook == HHOOK.Zero)
                 {
                     errCode = User32.GetLastError();
                     return false;
                 }
-                // Subscribe to exit process so we can release static resources
-                process = Process.GetCurrentProcess();
+                // Subscribe to exit process so we can release static resources                
                 process.Exited += Process_Exited;
             }
 
@@ -183,7 +179,7 @@ namespace SharpHotkeys.Hotkeys
         /// <param name="wParam"></param>
         /// <param name="lParam"></param>
         /// <returns></returns>
-        static LRESULT HookCallback(in int nCode, in WPARAM wParam, in LPARAM lParam)
+        static LRESULT HookCallback(int nCode, WPARAM wParam, LPARAM lParam)
         {            
             if (hotkeys.ContainsKey(nCode)) // Raise Hot-key clicked event
                 hotkeys[nCode].OnHotkeyClicked();

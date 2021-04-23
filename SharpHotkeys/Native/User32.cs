@@ -30,6 +30,7 @@ using static SharpHotkeys.Native.Delegates;
 /// <summary>
 /// Contains external functions defined in windows native libraries.
 /// Read Source: https://docs.microsoft.com/en-us/windows/win32/winmsg/about-hooks
+/// Read Source: https://docs.microsoft.com/en-us/previous-versions/windows/desktop/legacy/ms644985(v=vs.85)
 /// </summary>
 namespace SharpHotkeys.Native
 {
@@ -41,7 +42,9 @@ namespace SharpHotkeys.Native
         /// <summary>
         /// User32 DLL that contains these external functions.
         /// </summary>
-        const string USER_32 = "user32";
+        const string USER_32 = "User32";
+
+        const string KERNAL_32 = "Kernel32";
 
         // Read Source: https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-registerhotkey
         [DllImport(USER_32, SetLastError = true)]
@@ -84,8 +87,14 @@ namespace SharpHotkeys.Native
         );
 
         // https://docs.microsoft.com/en-us/windows/win32/api/errhandlingapi/nf-errhandlingapi-getlasterror
-        [DllImport(USER_32)]
+        [DllImport(KERNAL_32)]
         public static extern DWORD GetLastError();
+
+        // https://docs.microsoft.com/en-us/windows/win32/api/libloaderapi/nf-libloaderapi-getmodulehandlea
+        [DllImport(KERNAL_32)]
+        public static extern IntPtr GetModuleHandle(
+            string lpModuleName
+        );
     }
 
     internal class Delegates
@@ -97,6 +106,6 @@ namespace SharpHotkeys.Native
         /// <param name="wParam"></param>
         /// <param name="lParam"></param>
         /// <returns></returns>
-        public delegate LRESULT HookCallbackDelegate(in int nCode, in WPARAM wParam, in LPARAM lParam);
+        public delegate LRESULT HookCallbackDelegate(int nCode, WPARAM wParam, LPARAM lParam);
     }
 }
