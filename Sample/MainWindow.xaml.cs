@@ -2,8 +2,10 @@
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Interop;
+using System.Windows.Input;
 
-using SharpHotkeys.Hotkeys;
+using SharpHotkeys.WPF;
+using SharpHotkeys;
 
 namespace Sample
 {
@@ -27,8 +29,8 @@ namespace Sample
 
             IntPtr windowHandle = new WindowInteropHelper(this).Handle;
 
-            hotkey = new Hotkey(SharpHotkeys.Enumerations.Keys.B, 
-                SharpHotkeys.Enumerations.Modifiers.MOD_CONTROL | SharpHotkeys.Enumerations.Modifiers.MOD_NOREPEAT, 
+            hotkey = new Hotkey(Key.F6, 
+                ModifierKeys.Shift, 
                 windowHandle
                 );
 
@@ -48,7 +50,6 @@ namespace Sample
         protected override void OnClosing(CancelEventArgs e)
         {
             hotkey.Dispose();
-            Hotkey.ReleaseStaticResources();
             base.OnClosing(e);
         }
     }
