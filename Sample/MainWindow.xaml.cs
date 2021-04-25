@@ -16,8 +16,6 @@ namespace Sample
     {
         Hotkey hotkey;
 
-        int counter = 0;
-
         public MainWindow()
         {
             InitializeComponent();
@@ -36,13 +34,13 @@ namespace Sample
 
             if (!hotkey.TryRegisterHotkey(out uint errCode))
             {
-                lbl.Content = errCode;
+                throw new Exception("ErrCode Received:" + errCode);
             }
             else
             {
                 hotkey.HotkeyClicked += delegate
                 {
-                    lbl.Content = counter++;
+                    MessageBox.Show("Hot-key Clicked!");
                 };
             }
         }

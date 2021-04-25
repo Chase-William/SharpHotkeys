@@ -62,7 +62,7 @@ namespace SharpHotkeys.Native
             int id
         );       
 
-        // https://docs.microsoft.com/en-us/windows/win32/api/errhandlingapi/nf-errhandlingapi-getlasterror
+        // Read Source https://docs.microsoft.com/en-us/windows/win32/api/errhandlingapi/nf-errhandlingapi-getlasterror
         [DllImport(KERNAL_32)]
         public static extern DWORD GetLastError();
     }

@@ -35,12 +35,12 @@ namespace SharpHotkeys.Hotkeys
         /// <summary>
         /// Gets the key that is associated to the hot-key.
         /// </summary>
-        private readonly int key;
+        protected readonly int key;
 
         /// <summary>
         /// 
         /// </summary>
-        public readonly int mods;   
+        protected readonly int mods;   
 
         /// <summary>
         /// Gets a boolean indicating if this hot-key is currently registered.
