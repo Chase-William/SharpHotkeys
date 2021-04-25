@@ -19,33 +19,42 @@ namespace SharpHotkeys.WPF
         /// Read Source: https://docs.microsoft.com/en-us/windows/win32/inputdev/wm-hotkey
         /// </summary>
         const int MW_HOTKEY = 0x0312;
-        
+
         public Hotkey(Key key, ModifierKeys modifiers, IntPtr windowHandle) : base(KeyInterop.VirtualKeyFromKey(key), (int)modifiers, windowHandle)
-            => Init();
+        { }
 
         public Hotkey(Key key, ModifierKeys modifiers, Window window) : base(KeyInterop.VirtualKeyFromKey(key), (int)modifiers, new WindowInteropHelper(window).Handle)
-            => Init();
+        { }
 
         public Hotkey(Key key, ModifierKeys modifiers, WindowInteropHelper helper) : base(KeyInterop.VirtualKeyFromKey(key), (int)modifiers, helper.Handle)
-            => Init();
+        { }
 
-        void Init()
-            => ComponentDispatcher.ThreadPreprocessMessage += ComponentDispatcher_ThreadPreprocessMessage;
+        //public Hotkey(Key key, ModifierKeys modifiers, IntPtr windowHandle) : base(KeyInterop.VirtualKeyFromKey(key), (int)modifiers, windowHandle)
+        //    => Init();
 
-        private void ComponentDispatcher_ThreadPreprocessMessage(ref MSG msg, ref bool handled)
-        {
-            if (handled) return;
-            if (msg.message != MW_HOTKEY || (int)(msg.wParam) != _nCode) return;
+        //public Hotkey(Key key, ModifierKeys modifiers, Window window) : base(KeyInterop.VirtualKeyFromKey(key), (int)modifiers, new WindowInteropHelper(window).Handle)
+        //    => Init();
 
-            OnHotkeyClicked();
-            handled = true;
-        }        
+        //public Hotkey(Key key, ModifierKeys modifiers, WindowInteropHelper helper) : base(KeyInterop.VirtualKeyFromKey(key), (int)modifiers, helper.Handle)
+        //    => Init();
 
-        protected override void Dispose(bool isDisposing)
-        {
-            if (!isDisposed) // Detach if not disposed      
-                ComponentDispatcher.ThreadPreprocessMessage -= ComponentDispatcher_ThreadPreprocessMessage;            
-            base.Dispose(isDisposing);            
-        }
+        //void Init()
+        //    => ComponentDispatcher.ThreadPreprocessMessage += ComponentDispatcher_ThreadPreprocessMessage;
+
+        //private void ComponentDispatcher_ThreadPreprocessMessage(ref MSG msg, ref bool handled)
+        //{           
+        //    if (handled) return;
+        //    if (msg.message != MW_HOTKEY || (int)(msg.wParam) != _nCode) return;
+
+        //    OnHotkeyClicked();
+        //    handled = true;
+        //}        
+
+        //protected override void Dispose(bool isDisposing)
+        //{
+        //    if (!isDisposed) // Detach if not disposed      
+        //        ComponentDispatcher.ThreadPreprocessMessage -= ComponentDispatcher_ThreadPreprocessMessage;            
+        //    base.Dispose(isDisposing);            
+        //}
     }
 }

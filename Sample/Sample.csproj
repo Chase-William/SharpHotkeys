@@ -50,6 +50,14 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="SharpHotkeys.WPF, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\SharpHotkeys.WPF\bin\Debug\SharpHotkeys.WPF.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpHotkeysStandard, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\SharpHotkeysStandard\bin\Debug\netstandard2.0\SharpHotkeysStandard.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
@@ -120,16 +128,6 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\SharpHotkeys.WPF\SharpHotkeys.WPF.csproj">
-      <Project>{44d00e07-19cc-421b-b813-fda2bae326ea}</Project>
-      <Name>SharpHotkeys.WPF</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\SharpHotkeys\SharpHotkeys.csproj">
-      <Project>{c8c32f5b-fb51-4cde-bda7-3d0db9caee2a}</Project>
-      <Name>SharpHotkeys</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -14,7 +14,8 @@ namespace Sample
     /// </summary>
     public partial class MainWindow : Window
     {
-        Hotkey hotkey;
+        Hotkey f6;
+        Hotkey h;
 
         int counter = 0;
 
@@ -29,18 +30,35 @@ namespace Sample
 
             IntPtr windowHandle = new WindowInteropHelper(this).Handle;
 
-            hotkey = new Hotkey(Key.F6, 
-                ModifierKeys.Shift, 
+            f6 = new Hotkey(Key.F6, 
+                ModifierKeys.None, 
                 windowHandle
                 );
 
-            if (!hotkey.TryRegisterHotkey(out uint errCode))
+            if (!f6.TryRegisterHotkey(out uint errCode))
             {
                 lbl.Content = errCode;
             }
             else
             {
-                hotkey.HotkeyClicked += delegate
+                f6.HotkeyClicked += delegate
+                {
+                    lbl.Content = counter++;
+                };
+            }
+
+            h = new Hotkey(Key.H,
+                ModifierKeys.None,
+                windowHandle
+                );
+
+            if (!h.TryRegisterHotkey(out errCode))
+            {
+                lbl.Content = errCode;
+            }
+            else
+            {
+                h.HotkeyClicked += delegate
                 {
                     lbl.Content = counter++;
                 };
@@ -49,7 +67,8 @@ namespace Sample
 
         protected override void OnClosing(CancelEventArgs e)
         {
-            hotkey.Dispose();
+            f6.Dispose();
+            h.Dispose();
             base.OnClosing(e);
         }
     }
