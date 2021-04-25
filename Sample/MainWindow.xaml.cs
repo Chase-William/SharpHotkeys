@@ -2,8 +2,10 @@
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Interop;
+using System.Windows.Input;
 
-using SharpHotkeys.Hotkeys;
+using SharpHotkeys.WPF;
+using SharpHotkeys;
 
 namespace Sample
 {
@@ -13,8 +15,6 @@ namespace Sample
     public partial class MainWindow : Window
     {
         Hotkey hotkey;
-
-        int counter = 0;
 
         public MainWindow()
         {
@@ -27,16 +27,20 @@ namespace Sample
 
             IntPtr windowHandle = new WindowInteropHelper(this).Handle;
 
-            hotkey = new Hotkey(SharpHotkeys.Enumerations.Keys.F6, SharpHotkeys.Enumerations.Modifiers.MOD_CONTROL, windowHandle);
+            hotkey = new Hotkey(Key.F6, 
+                ModifierKeys.Shift, 
+                windowHandle
+                );
+
             if (!hotkey.TryRegisterHotkey(out uint errCode))
             {
-                lbl.Content = errCode;
+                throw new Exception("ErrCode Received:" + errCode);
             }
             else
             {
                 hotkey.HotkeyClicked += delegate
                 {
-                    lbl.Content = counter++;
+                    MessageBox.Show("Hot-key Clicked!");
                 };
             }
         }
@@ -44,7 +48,6 @@ namespace Sample
         protected override void OnClosing(CancelEventArgs e)
         {
             hotkey.Dispose();
-            Hotkey.ReleaseStaticResources();
             base.OnClosing(e);
         }
     }

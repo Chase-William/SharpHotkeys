@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("SharpHotkeys")]
+[assembly: AssemblyTitle("SharpHotkeys.WPF")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("SharpHotkeys")]
+[assembly: AssemblyProduct("SharpHotkeys.WPF")]
 [assembly: AssemblyCopyright("Copyright ©  2021")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("c8c32f5b-fb51-4cde-bda7-3d0db9caee2a")]
+[assembly: Guid("44d00e07-19cc-421b-b813-fda2bae326ea")]
 
 // Version information for an assembly consists of the following four values:
 //

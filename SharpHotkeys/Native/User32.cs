@@ -51,8 +51,8 @@ namespace SharpHotkeys.Native
         public static extern bool RegisterHotKey(   
             HWND hWnd, 
             int id, 
-            uint fsModifiers,
-            uint vk
+            int fsModifiers,
+            int vk
         );
 
         // Read Source: https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-unregisterhotkey
@@ -60,44 +60,14 @@ namespace SharpHotkeys.Native
         public static extern bool UnregisterHotKey(
             HWND hWnd,
             int id
-        );
+        );       
 
-        // Read Source: https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-callnexthookex
-        [DllImport(USER_32)]
-        public static extern IntPtr CallNextHookEx(
-          HHOOK hhk,
-          int nCode,
-          WPARAM wParam,
-          LPARAM lParam
-        );
-
-        // Read Source: https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setwindowshookexa
-        [DllImport(USER_32, SetLastError = true)]
-        public static extern HHOOK SetWindowsHookExA(
-            int idHook,
-            HookCallbackDelegate lpfn, // Pass method address callback function here for intercepting hooks
-            HINSTANCE hmod,
-            DWORD dwThreadId
-        );
-
-        // Read Source: https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-unhookwindowshookex
-        [DllImport(USER_32, SetLastError = true)]
-        public static extern bool UnhookWindowsHookEx(
-          HHOOK hhk
-        );
-
-        // https://docs.microsoft.com/en-us/windows/win32/api/errhandlingapi/nf-errhandlingapi-getlasterror
+        // Read Source https://docs.microsoft.com/en-us/windows/win32/api/errhandlingapi/nf-errhandlingapi-getlasterror
         [DllImport(KERNAL_32)]
         public static extern DWORD GetLastError();
-
-        // https://docs.microsoft.com/en-us/windows/win32/api/libloaderapi/nf-libloaderapi-getmodulehandlea
-        [DllImport(KERNAL_32)]
-        public static extern IntPtr GetModuleHandle(
-            string lpModuleName
-        );
     }
 
-    internal class Delegates
+    public class Delegates
     {
         /// <summary>
         /// Defines the delegate of the callback function for hooks that is given to the <see cref="User32.SetWindowsHookExA(int, HWND, HWND, DWORD)"/> function.
