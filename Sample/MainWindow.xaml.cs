@@ -33,16 +33,12 @@ namespace Sample
                 );
 
             if (!hotkey.TryRegisterHotkey(out uint errCode))
-            {
                 throw new Exception("ErrCode Received:" + errCode);
-            }
-            else
+           
+            hotkey.HotkeyClicked += delegate
             {
-                hotkey.HotkeyClicked += delegate
-                {
-                    MessageBox.Show("Hot-key Clicked!");
-                };
-            }
+                MessageBox.Show("Hot-key Clicked!");
+            };            
         }
 
         protected override void OnClosing(CancelEventArgs e)
