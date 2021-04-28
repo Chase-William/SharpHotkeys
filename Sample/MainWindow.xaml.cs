@@ -29,7 +29,7 @@ namespace Sample
 
             hotkey = new Hotkey(Key.F6, 
                 ModifierKeys.Shift, 
-                windowHandle
+                IntPtr.Zero // Or pass in the windowHandle if you want to associate with the window instead of the calling thread.
                 );
 
             if (!hotkey.TryRegisterHotkey(out uint errCode))

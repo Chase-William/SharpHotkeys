@@ -13,7 +13,7 @@ namespace SharpHotkeys.Hotkeys
 {
     /// <summary>
     /// A <see cref="HotkeyBase"/> that can be registered / unregistered and listened to.
-    /// Read Source: https://docs.microsoft.com/en-us/windows/win32/winmsg/hooks
+    /// Read Source: <a href="https://docs.microsoft.com/en-us/windows/win32/winmsg/hooks">Docs</a>
     /// </summary>
     public class HotkeyBase : IDisposable
     {        

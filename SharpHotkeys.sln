@@ -5,9 +5,9 @@ VisualStudioVersion = 16.0.31129.286
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sample", "Sample\Sample.csproj", "{BF1156DE-9E3C-4BFF-B72F-C2038FD1D396}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpHotkeys.WPF", "SharpHotkeys.WPF\SharpHotkeys.WPF.csproj", "{44D00E07-19CC-421B-B813-FDA2BAE326EA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpHotkeys.WPF", "src\SharpHotkeys.WPF\SharpHotkeys.WPF.csproj", "{44D00E07-19CC-421B-B813-FDA2BAE326EA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpHotkeys", "SharpHotkeys\SharpHotkeys.csproj", "{3FDB36B8-DD31-42AA-B601-567D4479C75D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpHotkeys", "src\SharpHotkeys\SharpHotkeys.csproj", "{3FDB36B8-DD31-42AA-B601-567D4479C75D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

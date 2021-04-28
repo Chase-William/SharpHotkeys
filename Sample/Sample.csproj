@@ -51,7 +51,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="SharpHotkeys">
-      <HintPath>..\SharpHotkeys\bin\Debug\netstandard2.0\SharpHotkeys.dll</HintPath>
+      <HintPath>..\..\..\Users\Chase Roth\Desktop\temp\SharpHotkeys\SharpHotkeys.WPF\bin\Debug\SharpHotkeys.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -125,7 +125,7 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SharpHotkeys.WPF\SharpHotkeys.WPF.csproj">
+    <ProjectReference Include="..\src\SharpHotkeys.WPF\SharpHotkeys.WPF.csproj">
       <Project>{44d00e07-19cc-421b-b813-fda2bae326ea}</Project>
       <Name>SharpHotkeys.WPF</Name>
     </ProjectReference>
