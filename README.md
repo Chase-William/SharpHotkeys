@@ -20,7 +20,7 @@ hotkey.HotkeyClicked += delegate
 
 ### Cleaning Up:
 
-The Hotkey class implements the `IDisposable` interface so make sure to call the `Dispose` method when you are done with the hotkey.
+The Hotkey class implements the `IDisposable` interface so you can call `Dispose` when you are done with it to immeditely clean up. Otherwise the hotkey's finalizer will call `Dispose` for you when the object is being cleaned up by the GC.
 
 ```cs
 hotkey.Dispose();
