@@ -4,10 +4,11 @@ A simple hotkey library for WPF programs. The logic for the hotkeys are decouple
 ### Example Usage:
 Checkout the sample project to see a working demo.
 ```cs
-hotkey = new Hotkey(Key.F6, 
-    ModifierKeys.Shift, // Trigger key
+hotkey = new Hotkey(
+    Key.F6, 
+    ModifierKeys.Shift, 
     IntPtr.Zero // Or pass in the windowHandle if you want to associate with the window instead of the calling thread.
-    );
+);
 
 if (!hotkey.TryRegisterHotkey(out uint errCode)) // errCode is a win32 error number that can be looked up.
     throw new Exception("ErrCode Received:" + errCode);
