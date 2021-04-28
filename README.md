@@ -11,7 +11,7 @@ hotkey = new Hotkey(
 );
 
 if (!hotkey.TryRegisterHotkey(out uint errCode)) // errCode is a win32 error number that can be looked up.
-    throw new Exception("ErrCode Received:" + errCode);
+    throw new Exception("ErrCode Received: " + errCode);
 
 hotkey.HotkeyClicked += delegate
 {
