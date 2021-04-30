@@ -1,5 +1,5 @@
 # SharpHotkeys
-A simple hotkey library for WPF programs. The logic for the hotkeys are decoupled and structured so that UWP and WIN-UI 3.0 integration should be possible. If interested supporting other frameworks checkout the <a href="https://github.com/ChaseRoth/SharpHotkeys/tree/experimental">experimental</a> branch.
+A simple hotkey library for WPF programs.
 
 ### Example Usage:
 Checkout the sample project to see a working demo.
