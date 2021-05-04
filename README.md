@@ -1,7 +1,7 @@
 # SharpHotkeys
 A simple hotkey library for WPF programs.
 
-### Example Usage:
+### Example Usage
 Checkout the sample project to see a working demo.
 ```cs
 hotkey = new Hotkey(
@@ -19,7 +19,7 @@ hotkey.HotkeyClicked += delegate
 };   
 ```
 
-### Cleaning Up:
+### Cleaning Up
 
 The Hotkey class implements the `IDisposable` interface so you can call `Dispose` when you are done with it to immeditely clean up. Otherwise the hotkey's finalizer will call `Dispose` for you when the object is being cleaned up by the GC.
 
